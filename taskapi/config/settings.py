@@ -2,16 +2,24 @@ import os
 
 from pydantic import BaseSettings
 
+from .utils import generate_random_token
+
 
 class DefaultSettings(BaseSettings):
+    # [App settings]
     APP_HOST = os.environ.get("APP_HOST", "127.0.0.1")
     APP_PORT = os.environ.get("APP_PORT", 8000)
 
+    # [Database settings]
     DATABASE_DB = os.environ.get("DATABASE_DB", "taskapi")
     DATABASE_HOST = os.environ.get("DATABASE_HOST", "db")
     DATABASE_USER = os.environ.get("DATABASE_USER", "user123")
     DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", "password123")
     DATABASE_PORT = os.environ.get("DATABASE_PORT", 5432)
+
+    # [Auth settings]
+    SECRET_KEY = os.environ.get("SECRET_KEY", generate_random_token())
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
     @property
     def database_settings(self) -> dict:
