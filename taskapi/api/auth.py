@@ -10,13 +10,10 @@ from db.models import User
 from db.session import get_session
 from config import get_settings
 
-from .v1 import API_PREFIX
-
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 settings = get_settings()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"token")
 
 
 async def get_user(session: AsyncSession, email: str) -> User | None:
@@ -52,7 +49,7 @@ def decode_token(token: str) -> dict:
 async def get_current_user(
         session: Annotated[AsyncSession, Depends(get_session)],
         token: Annotated[str, Depends(oauth2_scheme)]
-) -> dict:
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

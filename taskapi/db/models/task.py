@@ -11,8 +11,8 @@ class Task(BaseModel):
 
     id = sa.Column(sa.INTEGER, primary_key=True, autoincrement=True, nullable=False)
     title = sa.Column(sa.VARCHAR(100), nullable=False)
-    description = sa.Column(sa.TEXT(2000))
-    is_done = sa.Column(sa.BOOLEAN, default=False)
+    description = sa.Column(sa.VARCHAR(2000))
+    is_done = sa.Column(sa.BOOLEAN, default=False, nullable=False)
 
     created_at = sa.Column(sa.DateTime, default=sa.func.now())
     updated_at = sa.Column(sa.DateTime, default=sa.func.now(), onupdate=sa.func.now())
