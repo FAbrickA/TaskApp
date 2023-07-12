@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import User
@@ -17,7 +18,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/{TOKEN_URL}")
 
 
 async def get_user(session: AsyncSession, email: str) -> User | None:
-    return await session.query(User).filter(User.email == email).first()
+    stmt = select(User).where(User.email == email).limit(1)
+    result = await session.execute(stmt)
+    return result.one_or_none()
 
 
 async def authenticate_user(session: AsyncSession, email: str, password: str) -> User | None:
