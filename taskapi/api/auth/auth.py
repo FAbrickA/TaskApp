@@ -10,10 +10,10 @@ from db.models import User
 from db.session import get_session
 from config import get_settings
 
-ALGORITHM = "HS256"
+from .config import ALGORITHM, API_PREFIX, TOKEN_URL
 
 settings = get_settings()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/{TOKEN_URL}")
 
 
 async def get_user(session: AsyncSession, email: str) -> User | None:
