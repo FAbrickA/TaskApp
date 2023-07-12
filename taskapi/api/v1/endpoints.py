@@ -1,4 +1,11 @@
-from fastapi import APIRouter, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Response, status, Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from db.models import User
+from db.session import get_session
 
 router = APIRouter()
 
@@ -10,3 +17,13 @@ async def ping():
         status_code=status.HTTP_200_OK,
     )
 
+
+@router.get("/test_db")
+async def test_db(session: Annotated[AsyncSession, Depends(get_session)]):
+    stmt = select(User).limit(1)
+    user = await session.scalar(stmt)
+    print(user)
+    return Response(
+        str(user),
+        status_code=status.HTTP_200_OK,
+    )
