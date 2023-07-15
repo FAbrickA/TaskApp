@@ -21,7 +21,8 @@ async def ping():
 @router.get("/test_db")
 async def test_db(session: Annotated[AsyncSession, Depends(get_session)]):
     stmt = select(User).limit(1)
-    user = await session.scalar(stmt)
+    result = await session.execute(stmt)
+    user = result.one_or_none()
     print(user)
     return Response(
         str(user),

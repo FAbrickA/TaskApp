@@ -1,7 +1,7 @@
 import os
 
-from pydantic import BaseSettings
 from dotenv import load_dotenv
+from pydantic.v1 import BaseSettings
 
 from .utils import generate_random_token
 
