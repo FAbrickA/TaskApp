@@ -11,10 +11,12 @@ from db.models import User
 from db.session import get_session
 from config import get_settings
 
-from .config import ALGORITHM, API_PREFIX, TOKEN_URL
+from api.v1.config import API_PREFIX as API_PREFIX_V1
+
+from .config import ALGORITHM, TOKEN_URL, API_PREFIX as API_PREFIX_AUTH
 
 settings = get_settings()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/{TOKEN_URL}")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX_V1}{API_PREFIX_AUTH}{TOKEN_URL}")
 
 
 async def get_user(session: AsyncSession, email: str) -> User | None:
@@ -23,12 +25,18 @@ async def get_user(session: AsyncSession, email: str) -> User | None:
     return result.one_or_none()
 
 
-async def authenticate_user(session: AsyncSession, email: str, password: str) -> User | None:
+async def authenticate_user(session: AsyncSession, email: str, password: str) -> User:
     user = await get_user(session, email)
     if not user:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find user with email: {email}",
+        )
     if not user.check_password(password):
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Incorrect password",
+        )
     return user
 
 
