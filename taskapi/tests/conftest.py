@@ -1,11 +1,13 @@
 import os
 from asyncio import get_event_loop_policy
+from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app import get_app
+from db.models import User
 from db.models.base_model import BaseModel
 from db.session import get_session
 
@@ -28,26 +30,46 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def db() -> AsyncSession:
+async def init_db() -> str:
     async with engine.begin() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
-    async with TestingSessionLocal() as session:
-        yield session
+    yield TEST_DATABASE_URL
 
     os.remove(TEST_DATABASE_PATH)
 
 
 @pytest.fixture
-async def client(db) -> AsyncClient:
-    async def override_get_session() -> AsyncSession:
+async def session(init_db) -> AsyncSession:
+    async with TestingSessionLocal() as session:
         try:
-            yield db
+            yield session
         finally:
-            await db.rollback()
+            await session.rollback()
 
+
+@pytest.fixture
+async def client(session) -> AsyncClient:
     app = get_app()
-    app.dependency_overrides[get_session] = override_get_session
+    app.dependency_overrides[get_session] = lambda: session
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def user_sample(session) -> tuple[User, str]:
+    # Generate user data
+    username = str(uuid4())
+    email = f"{username}@email.com"
+    raw_password = str(uuid4())
+
+    user = User(
+        email=email,
+    )
+    user.set_password(raw_password)
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    return user, raw_password
