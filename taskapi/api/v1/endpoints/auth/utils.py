@@ -22,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX_V1}{API_PREFIX_AUTH}
 async def get_user(session: AsyncSession, email: str) -> User | None:
     stmt = select(User).where(User.email == email).limit(1)
     result = await session.execute(stmt)
-    return result.one_or_none()
+    return result.scalar_one_or_none()
 
 
 async def authenticate_user(session: AsyncSession, email: str, password: str) -> User:
@@ -52,7 +52,7 @@ def create_access_token(payload: dict, expires_delta: dt.timedelta | None = None
 
 
 def decode_token(token: str) -> dict:
-    # JWTError will be raised if token is invalid
+    # JWTError will be raised if token is invalid, including expired
     decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
     return decoded_token
 

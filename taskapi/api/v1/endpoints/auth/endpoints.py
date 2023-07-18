@@ -12,7 +12,7 @@ from .schemas import UserData, Token
 router = APIRouter(prefix=API_PREFIX)
 
 
-@router.get(TOKEN_URL, response_model=Token)
+@router.post(TOKEN_URL, response_model=Token)
 async def login_for_access_token(
         user_data: UserData,
         session: Annotated[AsyncSession, Depends(get_session)]
@@ -23,4 +23,3 @@ async def login_for_access_token(
         access_token=access_token,
         token_type="bearer"
     )
-
