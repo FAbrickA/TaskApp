@@ -8,9 +8,7 @@ from db.models import User
 class TestAuthToken:
     url = "/api/v1/auth/token"
 
-    async def test_get_token(self, client, user_sample: tuple[User, str]):
-        user, raw_password = user_sample
-
+    async def test_get_token(self, client, user, raw_password):
         # make request to get token
         user_data = UserData(
             email=user.email,

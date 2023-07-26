@@ -79,3 +79,8 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def get_authorization_headers(access_token, token_type="bearer") -> dict:
+    headers = {"Authorization": f"{token_type} {access_token}"}
+    return headers
