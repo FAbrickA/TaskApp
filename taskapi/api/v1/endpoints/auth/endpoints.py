@@ -1,13 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.models import User
 from db.session import get_session
-from .utils import authenticate_user, create_access_token
+from .utils import authenticate_user, create_access_token, get_user
 
 from .config import API_PREFIX, TOKEN_URL
-from .schemas import UserData, Token
+from .schemas import UserData, Token, RegistrationData
 
 router = APIRouter(prefix=API_PREFIX)
 
@@ -23,3 +24,25 @@ async def login_for_access_token(
         access_token=access_token,
         token_type="bearer"
     )
+
+
+@router.post("/signup")
+async def signup(
+        reg_data: RegistrationData,
+        session: Annotated[AsyncSession, Depends(get_session)]
+):
+    user = await get_user(session, reg_data.email)
+
+    # if user with such login already exists, throw exception
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already exists",
+        )
+
+    user = User(
+        email=reg_data.email,
+    )
+    user.set_password(reg_data.password)
+    session.add(user)
+    await session.commit()

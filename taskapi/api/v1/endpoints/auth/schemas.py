@@ -9,3 +9,8 @@ class UserData(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class RegistrationData(BaseModel):
+    email: str
+    password: str
