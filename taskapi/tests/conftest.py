@@ -74,7 +74,8 @@ async def user(session, raw_password) -> User:
     """
     Generate User and save it to testing database
     """
-    yield await generate_user(session, raw_password)
+    user, _ = await generate_user(session, raw_password)
+    yield user
 
 
 @pytest.fixture
@@ -82,8 +83,11 @@ async def user_factory(session):
     """
     Create factory to generate more users if one is not enough
     """
-    async def _generate_user() -> User:
-        return await generate_user(session)
+    async def _generate_user(need_raw_password=False) -> User | tuple[User, str]:
+        user, raw_password = await generate_user(session)
+        if need_raw_password:
+            return user, raw_password
+        return user
 
     yield _generate_user
 

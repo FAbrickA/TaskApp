@@ -3,7 +3,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import Task
+from db.models import Task, User
 
 
 async def is_task_exist(session: AsyncSession, task: Task) -> bool:
@@ -11,8 +11,8 @@ async def is_task_exist(session: AsyncSession, task: Task) -> bool:
     Check if Task exist by task.title
     """
     stmt = select(Task.id).where(Task.title == task.title).limit(1)
-    result = await session.scalar(stmt)
-    return bool(result)
+    result = await session.execute(stmt)
+    return bool(result.fetchone())
 
 
 async def get_not_existing_task_id(session: AsyncSession) -> int:
@@ -64,3 +64,12 @@ async def add_task_to_database(
     """
 
     return await add_tasks_to_database(session, [task], user_id=user_id)
+
+
+async def is_user_exist(session: AsyncSession, user: User) -> bool:
+    """
+    Check if User exists by User.email
+    """
+    stmt = select(User.id).where(User.email == user.email).limit(1)
+    result = await session.execute(stmt)
+    return bool(result.fetchone())
