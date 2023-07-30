@@ -10,10 +10,22 @@ from .utils import authenticate_user, create_access_token, get_user
 from .config import API_PREFIX, TOKEN_URL
 from .schemas import UserData, Token, RegistrationData
 
-router = APIRouter(prefix=API_PREFIX)
+router = APIRouter(prefix=API_PREFIX, tags=["Auth"])
 
 
-@router.post(TOKEN_URL, response_model=Token)
+@router.post(
+    TOKEN_URL,
+    status_code=status.HTTP_200_OK,
+    response_model=Token,
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Incorrect password",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Cannot find the user",
+        },
+    }
+)
 async def login_for_access_token(
         user_data: UserData,
         session: Annotated[AsyncSession, Depends(get_session)]
@@ -26,7 +38,15 @@ async def login_for_access_token(
     )
 
 
-@router.post("/signup")
+@router.post(
+    "/signup",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_409_CONFLICT: {
+            "description": "User already exists",
+        },
+    }
+)
 async def signup(
         reg_data: RegistrationData,
         session: Annotated[AsyncSession, Depends(get_session)]

@@ -9,7 +9,7 @@ from .config import API_PREFIX
 from .schemas import PingResponse
 from .utils import health_check_db
 
-router = APIRouter(prefix=API_PREFIX, tags=["Application Health"])
+router = APIRouter(prefix=API_PREFIX, tags=["Health"])
 
 
 @router.get(
@@ -27,6 +27,11 @@ async def ping_app():
     "/ping_db",
     response_model=PingResponse,
     status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is not working",
+        },
+    }
 )
 async def ping_db(session: Annotated[AsyncSession, Depends(get_session)]):
     if await health_check_db(session):
@@ -34,6 +39,6 @@ async def ping_db(session: Annotated[AsyncSession, Depends(get_session)]):
             message="Database is working!",
         )
     raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         detail="Database isn't working(",
     )

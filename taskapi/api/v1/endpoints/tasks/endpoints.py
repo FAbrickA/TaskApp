@@ -11,10 +11,22 @@ from .config import API_PREFIX
 from .schemas import Task as TaskSchema, TasksList, AddNewTask, UpdateTask
 from ..auth.utils import get_current_user
 
-router = APIRouter(prefix=API_PREFIX)
+router = APIRouter(prefix=API_PREFIX, tags=["Tasks"])
 
 
-@router.get("/{task_id}", response_model=TaskSchema)
+@router.get(
+    "/{task_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=TaskSchema,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Could not validate credentials",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Cannot find the task",
+        },
+    }
+)
 async def get_task(
         task_id: int,
         user: Annotated[User, Depends(get_current_user)],
@@ -33,7 +45,16 @@ async def get_task(
     return task_response
 
 
-@router.get("/", response_model=TasksList)
+@router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=TasksList,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Could not validate credentials",
+        },
+    }
+)
 async def get_all_tasks(
         user: Annotated[User, Depends(get_current_user)],
         session: Annotated[AsyncSession, Depends(get_session)]
@@ -44,7 +65,15 @@ async def get_all_tasks(
     return tasks_list_schema
 
 
-@router.post("/", status_code=status.HTTP_200_OK)
+@router.post(
+    "/",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Could not validate credentials",
+        },
+    }
+)
 async def add_new_task(
         task_schema: AddNewTask,
         user: Annotated[User, Depends(get_current_user)],
@@ -56,7 +85,18 @@ async def add_new_task(
     await session.commit()
 
 
-@router.put("/{task_id}", status_code=status.HTTP_200_OK)
+@router.put(
+    "/{task_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Could not validate credentials",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Cannot find the task",
+        },
+    }
+)
 async def update_task(
         task_id: int,
         task_schema: UpdateTask,
@@ -81,7 +121,18 @@ async def update_task(
     await session.commit()
 
 
-@router.delete("/{task_id}")
+@router.delete(
+    "/{task_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Could not validate credentials",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Cannot find the task",
+        },
+    }
+)
 async def delete_task(
         task_id: int,
         user: Annotated[User, Depends(get_current_user)],

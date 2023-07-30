@@ -30,7 +30,7 @@ async def authenticate_user(session: AsyncSession, email: str, password: str) ->
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Could not find user with email: {email}",
+            detail="Cannot find the user",
         )
     if not user.check_password(password):
         raise HTTPException(
