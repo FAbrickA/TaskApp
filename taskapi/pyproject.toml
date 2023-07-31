@@ -1,0 +1,28 @@
+# PYTEST
+
+[tool.pytest.ini_options]
+pythonpath = "./"
+asyncio_mode = "auto"
+
+[tool.pytest]
+python_files = "test_*.py"
+python_classes = ["*Test", "Test*"]
+python_functions = "test_*"
+testpaths = "tests/"
+
+[tool.coverage.report]
+exclude_lines = [
+    "# pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "def __unicode__",
+]
+show_missing = true
+skip_empty = true
+omit = [
+  "*/__init__.py",
+  "alembic/*",
+]
+
+[tool.coverage.html]
+directory = "tests/pytest-cov-report"
